@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      # unit tests only need scikit-learn; the full stack (torch, transformers) is for local runs
+      - run: pip install -r requirements-ci.txt
+      - run: pytest -q
+      - name: Results table builds from the committed raw rows
+        run: |
+          mkdir -p outputs && cp docs/results.jsonl outputs/results.jsonl
+          python src/report.py > /dev/null
